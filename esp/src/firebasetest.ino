@@ -14,12 +14,9 @@
 #include <Preferences.h>
 
 // ======================================
-// CONFIG
+// CONFIG - Load from local config.h (not in git)
 // ======================================
-#define Web_API_KEY    "AIzaSyBIHu-6KpzYuCMYhSLAMaHLht7jCW2Af_c"
-#define DATABASE_URL   "https://iot-capstone-582dd-default-rtdb.asia-southeast1.firebasedatabase.app"
-#define USER_EMAIL     "gwen+test@waterwatch.iot"
-#define USER_PASS      "WaterWatch123!"
+#include "config.h"
 
 // ======================================
 // HARDWARE

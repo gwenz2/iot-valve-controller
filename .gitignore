@@ -1,0 +1,24 @@
+# Credentials & Config
+config.h
+
+# PlatformIO
+.ioide
+.vscode
+.pio/
+.pioenvs/
+build/
+
+# IDE & OS
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Dependencies
+.piolibdeps/
+lib/
