@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>WaterWatch</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f6f6f3;
+      --surface: #ffffff;
+      --border: #e8e8e4;
+      --text-primary: #1a1a1a;
+      --text-secondary: #888;
+      --text-tertiary: #bbb;
+      --accent: #2563eb;
+      --accent-soft: #eff4ff;
+      --green: #16a34a;
+      --green-soft: #f0fdf4;
+      --green-border: #bbf7d0;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --red-border: #fecaca;
+      --radius: 12px;
+      --radius-sm: 9px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      min-height: 100dvh;
+      min-height: 100vh;
+    }
+    .screen.active { display: flex; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: calc(16px + var(--safe-top)) 20px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .wordmark {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .wordmark-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .topbar-right {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      flex: 1;
+      padding: 24px 20px;
+      overflow-y: auto;
+    }
+
+    .bottom-safe {
+      height: var(--safe-bottom);
+      flex-shrink: 0;
+    }
+
+    /* ── LOGIN ── */
+    #loginScreen .content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .login-icon {
+      width: 56px; height: 56px;
+      background: var(--accent-soft);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+    .login-title {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .login-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+    }
+    .login-btn-wrap { width: 100%; max-width: 320px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: scale(0.98); opacity: 0.85; }
+    .btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+
+    .btn-primary { background: var(--text-primary); color: #fff; }
+    .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-google { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
+
+    .btn-open {
+      background: var(--green-soft);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      padding: 16px 20px;
+    }
+    .btn-close-valve {
+      background: var(--red-soft);
+      color: var(--red);
+      border: 1px solid var(--red-border);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      padding: 16px 20px;
+    }
+
+    .btn-back {
+      width: auto; padding: 0; background: none; border: none;
+      color: var(--text-secondary); font-size: 13px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      display: flex; align-items: center; gap: 4px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-back:active { opacity: 0.6; }
+
+    /* ── USER BAR ── */
+    .user-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 24px;
+    }
+    .user-bar-email {
+      font-size: 12px; color: var(--text-secondary);
+      font-family: 'DM Mono', monospace;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      flex: 1; min-width: 0;
+    }
+    .btn-signout {
+      font-size: 12px; color: var(--text-tertiary);
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      padding: 4px 0 4px 12px; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.9px; text-transform: uppercase;
+      color: var(--text-tertiary); margin-bottom: 10px;
+    }
+
+    /* ── DEVICE LIST ── */
+    .device-list { display: flex; flex-direction: column; gap: 8px; }
+    .device-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--surface);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .device-item:active { background: var(--accent-soft); border-color: var(--accent); }
+    .device-item-info { display: flex; align-items: center; gap: 12px; }
+    .device-icon {
+      width: 36px; height: 36px;
+      background: var(--bg); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .device-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .device-hint { font-size: 11px; color: var(--text-tertiary); font-family: 'DM Mono', monospace; }
+    .device-arrow { color: var(--text-tertiary); flex-shrink: 0; }
+
+    .empty-state {
+      text-align: center; padding: 40px 0;
+      color: var(--text-tertiary); font-size: 13px; line-height: 1.7;
+    }
+
+    /* ── ADD ROW ── */
+    .add-row {
+      display: flex; align-items: center; gap: 12px;
+      margin: 16px 0;
+    }
+    .add-row-line { flex: 1; height: 1px; background: var(--border); }
+    .add-circle-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-tertiary);
+      font-size: 20px; line-height: 1;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .add-circle-btn:active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    /* ── CONTROL SCREEN ── */
+    #controlScreen .content {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .device-id-row { display: flex; flex-direction: column; gap: 2px; }
+    .device-id-value {
+      font-size: 15px; font-weight: 500;
+      font-family: 'DM Mono', monospace;
+      word-break: break-all;
+    }
+
+    .valve-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .valve-label {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.9px; text-transform: uppercase;
+      color: var(--text-tertiary); margin-bottom: 14px;
+    }
+    .valve-state {
+      font-size: 36px; font-weight: 600;
+      letter-spacing: -1px;
+      font-family: 'DM Mono', monospace;
+      min-height: 44px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .valve-state.open   { color: var(--green); }
+    .valve-state.closed { color: var(--red); }
+    .valve-state.loading { color: var(--text-tertiary); }
+
+    .conn-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 11px; border-radius: 20px;
+      font-size: 11px; font-weight: 500; margin-top: 14px;
+    }
+    .conn-badge.connected { background: var(--green-soft); color: var(--green); }
+    .conn-badge.disconnected { background: var(--red-soft); color: var(--red); }
+    .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    .valve-controls { display: flex; gap: 10px; }
+    .valve-controls .btn { flex: 1; }
+
+    .meta-row {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--text-tertiary);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── SPINNER ── */
+    .spin {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      opacity: 0.4;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      justify-content: flex-end;
+      align-items: flex-end;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px calc(24px + var(--safe-bottom));
+      width: 100%;
+      animation: slideUp 0.22s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.2px; }
+    .modal-desc  { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+    .modal-input {
+      width: 100%; padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px; color: var(--text-primary);
+      background: var(--bg); outline: none;
+      margin-bottom: 14px;
+      -webkit-appearance: none;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions .btn { flex: 1; }
+
+    @media (min-width: 480px) {
+      .modal-overlay { justify-content: center; align-items: center; padding: 20px; }
+      .modal { border-radius: 16px; max-width: 400px; padding: 28px; }
+      .modal-handle { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="screen active" id="loginScreen">
+    <div class="topbar">
+      <div class="wordmark"><div class="wordmark-dot"></div>WaterWatch</div>
+      <div class="topbar-right">v2.0</div>
+    </div>
+    <div class="content">
+      <div class="login-icon">
+        <svg width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 2C6 9 4 13 4 16a8 8 0 0016 0c0-3-2-7-8-14z"/>
+        </svg>
+      </div>
+      <div class="login-title">Smart valve control</div>
+      <div class="login-sub">Sign in to manage your water devices</div>
+      <div class="login-btn-wrap">
+        <button class="btn btn-google" onclick="loginWithGoogle()">
+          <svg width="16" height="16" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+    <div class="bottom-safe"></div>
+  </div>
+
+  <!-- DEVICES -->
+  <div class="screen" id="devicesScreen">
+    <div class="topbar">
+      <div class="wordmark"><div class="wordmark-dot"></div>WaterWatch</div>
+      <div class="topbar-right">Devices</div>
+    </div>
+    <div class="content">
+      <div class="user-bar">
+        <div class="user-bar-email" id="userEmail"></div>
+        <button class="btn-signout" onclick="logout()">Sign out</button>
+      </div>
+      <div class="section-label">Your Devices</div>
+      <div class="device-list" id="deviceList">
+        <div class="empty-state">Loading…</div>
+      </div>
+      <div class="add-row">
+        <div class="add-row-line"></div>
+        <button class="add-circle-btn" onclick="openAddDeviceModal()" title="Add device">+</button>
+        <div class="add-row-line"></div>
+      </div>
+    </div>
+    <div class="bottom-safe"></div>
+  </div>
+
+  <!-- CONTROL -->
+  <div class="screen" id="controlScreen">
+    <div class="topbar">
+      <div class="wordmark"><div class="wordmark-dot"></div>WaterWatch</div>
+      <button class="btn-back" onclick="backToDevices()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        Back
+      </button>
+    </div>
+    <div class="content">
+      <div class="device-id-row">
+        <div class="section-label">Controlling</div>
+        <div class="device-id-value" id="deviceLabel">—</div>
+      </div>
+      <div class="valve-box">
+        <div class="valve-label">Valve Status</div>
+        <div class="valve-state loading" id="status"><span class="spin"></span></div>
+        <div>
+          <span class="conn-badge disconnected" id="connectionStatus">
+            <span class="conn-dot"></span> Disconnected
+          </span>
+        </div>
+      </div>
+      <div class="valve-controls">
+        <button class="btn btn-open" id="openBtn" onclick="openValve()" disabled>Open</button>
+        <button class="btn btn-close-valve" id="closeBtn" onclick="closeValve()" disabled>Close</button>
+      </div>
+      <div class="meta-row">
+        <span>Firebase Realtime DB</span>
+        <span id="timestamp">--:--:--</span>
+      </div>
+    </div>
+    <div class="bottom-safe"></div>
+  </div>
+
+  <!-- ADD DEVICE MODAL -->
+  <div class="modal-overlay" id="addDeviceModal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Add Device</div>
+      <div class="modal-desc">Enter the Device ID printed on your WaterWatch unit.</div>
+      <input class="modal-input" type="text" id="modalDeviceId" placeholder="waterwatch_xxxxxxxx" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeAddDeviceModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAddDevice()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERT MODAL -->
+  <div class="modal-overlay" id="alertModal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="alertTitle">Notice</div>
+      <div class="modal-desc" id="alertMessage"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeAlertModal()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="confirmTitle">Confirm</div>
+      <div class="modal-desc" id="confirmMessage"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeConfirmModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, child, set, get, onValue, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    window.currentUser = null; window.currentDeviceId = null;
+    window.userDevices = []; window.deviceRef = null;
+    window.statusRef = null; window.commandRef = null;
+    window.isConnected = false; window.statusListener = null;
+    window.auth = null; window.db = null;
+    window.pendingConfirmAction = null;
+
+    const COMMAND_OPENED = 'OPEN';
+    const COMMAND_CLOSED = 'CLOSED';
+
+    //  SECURITY NOTE FOR POTENTIAL ATTACKERS:
+    // ════════════════════════════════════════════════════════════════
+    // The Firebase credentials below are intentionally public.
+    // This is a FEATURE, not a vulnerability.
+    //
+    //  Having the API key does NOT give you access to:
+    //   - Other users' devices
+    //   - Other users' data
+    //   - Device control commands
+    //   - Firebase database (without auth)
+    //
+    //  ACTUAL SECURITY IS ENFORCED BY:
+    //   1. Firebase Authentication (email/Google login required)
+    //   2. Firebase Realtime Database Rules (backend authorization)
+    //   3. Device ownership records (user-device mapping)
+    //   4. Per-user and per-device access restrictions
+    //
+    //  Any unauthorized access attempt will be BLOCKED by:
+    //   - Missing authentication token
+    //   - Firebase rule validation on server-side
+    //   - Permission denied errors returned to client
+    //
+    // This follows Google Cloud security best practices for web apps:
+    // https://firebase.google.com/docs/security/get-started
+    // ════════════════════════════════════════════════════════════════
+    const firebaseConfig = {
+      apiKey: "AIzaSyBIHu-6KpzYuCMYhSLAMaHLht7jCW2Af_c",
+      authDomain: "iot-capstone-582dd.firebaseapp.com",
+      projectId: "iot-capstone-582dd",
+      storageBucket: "iot-capstone-582dd.firebasestorage.app",
+      messagingSenderId: "1088930732443",
+      databaseURL: "https://iot-capstone-582dd-default-rtdb.asia-southeast1.firebasedatabase.app",
+      appId: "1:1088930732443:web:10eaf1ecaa821e38b0e93e"
+    };
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      window.auth = getAuth(app);
+      window.db = getDatabase(app);
+
+      onAuthStateChanged(window.auth, (user) => {
+        if (user) {
+          window.currentUser = user;
+          document.getElementById('userEmail').textContent = user.email;
+          showScreen('devicesScreen');
+          loadUserDevices();
+        } else {
+          window.currentUser = null;
+          showScreen('loginScreen');
+        }
+      });
+    } catch (e) { console.error(e); }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    window.loginWithGoogle = async function() {
+      try { await signInWithPopup(window.auth, new GoogleAuthProvider()); }
+      catch (e) { showAlert('Login failed: ' + e.message); }
+    };
+
+    window.logout = async function() {
+      try {
+        if (window.statusListener && window.statusRef) off(window.statusRef);
+        await signOut(window.auth);
+        window.userDevices = []; window.currentDeviceId = null;
+      } catch (e) { console.error(e); }
+    };
+
+    window.encodeEmail = (email) => email.replace(/\./g, '_').replace(/\//g, '_');
+
+    window.loadUserDevices = async function() {
+      if (!window.currentUser) return;
+      try {
+        const snap = await get(ref(window.db, 'users/' + window.encodeEmail(window.currentUser.email) + '/devices'));
+        window.userDevices = snap.exists()
+          ? (d => Array.isArray(d) ? d : Object.values(d))(snap.val())
+          : [];
+        window.displayDeviceList();
+      } catch (e) { console.error(e); }
+    };
+
+    window.displayDeviceList = function() {
+      const list = document.getElementById('deviceList');
+      if (!window.userDevices.length) {
+        list.innerHTML = '<div class="empty-state">No devices yet.<br>Add one using the + below.</div>';
+        return;
+      }
+      list.innerHTML = window.userDevices.map(id => `
+        <div class="device-item" onclick="selectDevice('${id}')">
+          <div class="device-item-info">
+            <div class="device-icon">
+              <svg width="16" height="16" fill="none" stroke="#888" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 2C6 9 4 13 4 16a8 8 0 0016 0c0-3-2-7-8-14z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="device-name">${id}</div>
+              <div class="device-hint">tap to control</div>
+            </div>
+          </div>
+          <div class="device-arrow">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>`).join('');
+    };
+
+    window.openAddDeviceModal = function() {
+      document.getElementById('addDeviceModal').classList.add('show');
+      document.getElementById('modalDeviceId').value = '';
+      setTimeout(() => document.getElementById('modalDeviceId').focus(), 100);
+    };
+    window.closeAddDeviceModal = () => document.getElementById('addDeviceModal').classList.remove('show');
+
+    window.confirmAddDevice = async function() {
+      if (!window.currentUser) return;
+      const deviceId = document.getElementById('modalDeviceId').value.trim();
+      if (!deviceId) return;
+      try {
+        const userEmail = window.encodeEmail(window.currentUser.email);
+        const devSnap = await get(ref(window.db, 'devices/' + deviceId));
+        if (!devSnap.exists()) { showAlert('Device not found. Check the ID and try again.'); return; }
+        const deviceData = devSnap.val();
+        if (deviceData.owner && deviceData.owner !== window.currentUser.email) {
+          showAlert('This device belongs to another account.'); return;
+        }
+        const userDevicesRef = ref(window.db, 'users/' + userEmail + '/devices');
+        const devicesSnap = await get(userDevicesRef);
+        let devices = [];
+        if (devicesSnap.exists()) {
+          const d = devicesSnap.val();
+          devices = Array.isArray(d) ? d : Object.values(d);
+        }
+        if (!devices.includes(deviceId)) devices.push(deviceId);
+        await Promise.all([
+          set(userDevicesRef, devices),
+          set(ref(window.db, 'devices/' + deviceId + '/owner'), window.currentUser.email)
+        ]);
+        window.closeAddDeviceModal();
+        await window.loadUserDevices();
+      } catch (e) { showAlert('Error: ' + e.message); }
+    };
+
+    window.selectDevice = function(deviceId) {
+      window.currentDeviceId = deviceId;
+      window.deviceRef  = ref(window.db, 'devices/' + deviceId);
+      window.statusRef  = child(window.deviceRef, 'status');
+      window.commandRef = child(window.deviceRef, 'command');
+      document.getElementById('deviceLabel').textContent = deviceId;
+      showScreen('controlScreen');
+      window.initializeDeviceControl();
+    };
+
+    window.backToDevices = function() {
+      if (window.statusListener && window.statusRef) off(window.statusRef);
+      window.currentDeviceId = null;
+      showScreen('devicesScreen');
+    };
+
+    window.initializeDeviceControl = function() {
+      onValue(ref(window.db, '.info/connected'), (snap) => {
+        window.isConnected = snap.val() === true;
+        window.updateConnectionStatus(window.isConnected);
+      });
+      window.statusListener = onValue(window.statusRef, (snap) => window.updateStatus(snap.val()));
+    };
+
+    window.updateStatus = function(status) {
+      const el = document.getElementById('status');
+      if (status === 'OPEN' || status === 'OPENED') {
+        el.className = 'valve-state open'; el.textContent = 'OPEN';
+      } else if (status === 'CLOSED') {
+        el.className = 'valve-state closed'; el.textContent = 'CLOSED';
+      } else {
+        el.className = 'valve-state loading'; el.innerHTML = '<span class="spin"></span>';
+      }
+      document.getElementById('openBtn').disabled  = !window.isConnected;
+      document.getElementById('closeBtn').disabled = !window.isConnected;
+      document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+    };
+
+    window.updateConnectionStatus = function(connected) {
+      const el = document.getElementById('connectionStatus');
+      el.className = 'conn-badge ' + (connected ? 'connected' : 'disconnected');
+      el.innerHTML = `<span class="conn-dot"></span> ${connected ? 'Connected' : 'Disconnected'}`;
+      document.getElementById('openBtn').disabled  = !connected;
+      document.getElementById('closeBtn').disabled = !connected;
+    };
+
+    window.openValve = function() {
+      if (!window.isConnected) return;
+      const el = document.getElementById('status');
+      el.className = 'valve-state loading'; el.innerHTML = '<span class="spin"></span>';
+      set(window.commandRef, COMMAND_OPENED).catch(e => showAlert(e.message));
+    };
+
+    window.closeValve = function() {
+      if (!window.isConnected) return;
+      const el = document.getElementById('status');
+      el.className = 'valve-state loading'; el.innerHTML = '<span class="spin"></span>';
+      set(window.commandRef, COMMAND_CLOSED).catch(e => showAlert(e.message));
+    };
+
+    function showAlert(msg, title = 'Notice') {
+      document.getElementById('alertTitle').textContent   = title;
+      document.getElementById('alertMessage').textContent = msg;
+      document.getElementById('alertModal').classList.add('show');
+    }
+    window.closeAlertModal   = () => document.getElementById('alertModal').classList.remove('show');
+    window.closeConfirmModal = () => document.getElementById('confirmModal').classList.remove('show');
+    window.confirmAction = function() {
+      if (window.pendingConfirmAction) window.pendingConfirmAction();
+      window.closeConfirmModal();
+    };
+
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
+    });
+  </script>
+</body>
+</html>
